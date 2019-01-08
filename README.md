@@ -2,7 +2,7 @@
 
 ## Deep Learning Project ##
 
-In this project, you will train a deep neural network to identify and track a target in simulation. So-called “follow me” applications like this are key to many fields of robotics and the very same techniques you apply here could be extended to scenarios like advanced cruise control in autonomous vehicles or human-robot collaboration in industry.
+In this project, a deep neural network is trained to identify and track a target in simulation. So-called “follow me” applications like this are key to many fields of robotics and the very same techniques that are applied here could be extended to scenarios like advanced cruise control in autonomous vehicles or human-robot collaboration in industry.
 
 [image_0]: ./docs/misc/sim_screenshot.png
 ![alt text][image_0] 
@@ -10,10 +10,10 @@ In this project, you will train a deep neural network to identify and track a ta
 ## Setup Instructions
 **Clone the repository**
 ```
-$ git clone https://github.com/udacity/RoboND-DeepLearning.git
+$ git clone https://github.com/navinrahim/RoboND-DeepLearning.git
 ```
 
-**Download the data**
+**The data**
 
 Save the following three files into the data folder of the cloned repository. 
 
@@ -23,9 +23,11 @@ Save the following three files into the data folder of the cloned repository.
 
 [Sample Evaluation Data](https://s3-us-west-1.amazonaws.com/udacity-robotics/Deep+Learning+Data/Project/sample_evaluation_data.zip)
 
+Note: The `train.zip` when extracted gives a `train_combined` folder which has to be renamed to `train`.
+
 **Download the QuadSim binary**
 
-To interface your neural net with the QuadSim simulator, you must use a version QuadSim that has been custom tailored for this project. The previous version that you might have used for the Controls lab will not work.
+To interface the neural net with the QuadSim simulator, you must use a version of QuadSim that has been custom tailored for this project.
 
 The simulator binary can be downloaded [here](https://github.com/udacity/RoboND-DeepLearning/releases/latest)
 
@@ -47,12 +49,12 @@ If for some reason you choose not to use Anaconda, you must install the followin
 * transforms3d
 * PyQt4/Pyqt5
 
-## Implement the Segmentation Network
+## Implementation of the Segmentation Network
 1. Download the training dataset from above and extract to the project `data` directory.
-2. Implement your solution in model_training.ipynb
-3. Train the network locally, or on [AWS](https://classroom.udacity.com/nanodegrees/nd209/parts/09664d24-bdec-4e64-897a-d0f55e177f09/modules/cac27683-d5f4-40b4-82ce-d708de8f5373/lessons/197a058e-44f6-47df-8229-0ce633e0a2d0/concepts/27c73209-5d7b-4284-8315-c0e07a7cd87f?contentVersion=1.0.0&contentLocale=en-us).
+2. The solution was implemented in [`model_training.ipynb`](./code/model_training.ipynb)
+3. Train the network locally, or on [AWS](https://classroom.udacity.com/nanodegrees/nd209/parts/09664d24-bdec-4e64-897a-d0f55e177f09/modules/cac27683-d5f4-40b4-82ce-d708de8f5373/lessons/197a058e-44f6-47df-8229-0ce633e0a2d0/concepts/27c73209-5d7b-4284-8315-c0e07a7cd87f?contentVersion=1.0.0&contentLocale=en-us). The Udacity Workspace is also available for the Nanodegree students which was used for this implementation.
 4. Continue to experiment with the training data and network until you attain the score you desire.
-5. Once you are comfortable with performance on the training dataset, see how it performs in live simulation!
+5. Once a comfortable performance on the training dataset is obtained, see how it performs in live simulation!
 
 ## Collecting Training Data ##
 A simple training dataset has been provided in this project's repository. This dataset will allow you to verify that your segmentation network is semi-functional. However, if your interested in improving your score,you may want to collect additional training data. To do it, please see the following steps.
@@ -73,7 +75,7 @@ data/raw_sim_data/validation/run1
 ### Training Set ###
 1. Run QuadSim
 2. Click the `DL Training` button
-3. Set patrol points, path points, and spawn points. **TODO** add link to data collection doc
+3. Set patrol points, path points, and spawn points. The buttons to add these can be found in the Quadsim's legend option.
 3. With the simulator running, press "r" to begin recording.
 4. In the file selection menu navigate to the `data/raw_sim_data/train/run1` directory
 5. **optional** to speed up data collection, press "9" (1-9 will slow down collection speed)
@@ -118,15 +120,20 @@ With your training and validation data having been generated or downloaded from 
 - Validation data is in the `data` directory
 - The folders `data/train/images/`, `data/train/masks/`, `data/validation/images/`, and `data/validation/masks/` should exist and contain the appropriate data
 
-To train complete the network definition in the `model_training.ipynb` notebook and then run the training cell with appropriate hyperparameters selected.
+To train the network, run the training cells in the [`model_training.ipynb`](./code/model_training.ipynb) notebook.
 
-After the training run has completed, your model will be stored in the `data/weights` directory as an [HDF5](https://en.wikipedia.org/wiki/Hierarchical_Data_Format) file, and a configuration_weights file. As long as they are both in the same location, things should work. 
+After the training run has completed, your model will be stored in the [`data/weights`](./data/weights) directory as an [HDF5](https://en.wikipedia.org/wiki/Hierarchical_Data_Format) file, and a configuration_weights file. As long as they are both in the same location, things should work. 
+
+Also, the best model is stored in the same folder using the Keras `ModelCheckpoint` callback.
 
 **Important Note** the *validation* directory is used to store data that will be used during training to produce the plots of the loss, and help determine when the network is overfitting your data. 
 
 The **sample_evalution_data** directory contains data specifically designed to test the networks performance on the FollowME task. In sample_evaluation data are three directories each generated using a different sampling method. The structure of these directories is exactly the same as `validation`, and `train` datasets provided to you. For instance `patrol_with_targ` contains an `images` and `masks` subdirectory. If you would like to the evaluation code on your `validation` data a copy of the it should be moved into `sample_evaluation_data`, and then the appropriate arguments changed to the function calls in the `model_training.ipynb` notebook.
 
-The notebook has examples of how to evaulate your model once you finish training. Think about the sourcing methods, and how the information provided in the evaluation sections relates to the final score. Then try things out that seem like they may work. 
+The notebook has examples of how to evaulate your model once you finish training. Think about the sourcing methods, and how the information provided in the evaluation sections relates to the final score. Then try things out that seem like they may work.
+
+## Model ##
+The primary task of this project is to identify and follow a person using a quadroptor in simulation. A semantic segmentation approach was selected for this purpose that accurately classifies the 
 
 ## Scoring ##
 
