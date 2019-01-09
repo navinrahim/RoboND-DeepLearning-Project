@@ -203,8 +203,8 @@ def fcn_model(inputs, num_classes):
     conv1_layer = conv2d_batchnorm(layer_3, 128, 1, 1)
     
     # Add the same number of Decoder Blocks as the number of Encoder Blocks
-    decoder_layer_1 = decoder_block(conv1_layer, layer_2, 128)
-    decoder_layer_2 = decoder_block(decoder_layer_1, layer_1, 64)
+    decoder_layer_1 = decoder_block(conv1_layer, layer_2, 64)
+    decoder_layer_2 = decoder_block(decoder_layer_1, layer_1, 32)
     x = decoder_block(decoder_layer_2, inputs, 16)
 
     
