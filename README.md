@@ -52,7 +52,7 @@ If for some reason you choose not to use Anaconda, you must install the followin
 ## Implementation of the Segmentation Network
 1. Download the training dataset from above and extract to the project `data` directory.
 2. The solution was implemented in [`model_training.ipynb`](./code/model_training.ipynb)
-3. Train the network locally, or on [AWS](https://classroom.udacity.com/nanodegrees/nd209/parts/09664d24-bdec-4e64-897a-d0f55e177f09/modules/cac27683-d5f4-40b4-82ce-d708de8f5373/lessons/197a058e-44f6-47df-8229-0ce633e0a2d0/concepts/27c73209-5d7b-4284-8315-c0e07a7cd87f?contentVersion=1.0.0&contentLocale=en-us). The Udacity Workspace is also available for the Nanodegree students which was used for this implementation.
+3. Train the network locally, or on [AWS](https://classroom.udacity.com/nanodegrees/nd209/parts/09664d24-bdec-4e64-897a-d0f55e177f09/modules/cac27683-d5f4-40b4-82ce-d708de8f5373/lessons/197a058e-44f6-47df-8229-0ce633e0a2d0/concepts/27c73209-5d7b-4284-8315-c0e07a7cd87f?contentVersion=1.0.0&contentLocale=en-us). This network was trained using a Nvidia GTX Titan XP GPU card on the local system.
 4. Continue to experiment with the training data and network until you attain the score you desire.
 5. Once a comfortable performance on the training dataset is obtained, see how it performs in live simulation!
 
@@ -113,14 +113,15 @@ The primary task of this project is to identify and follow a person using a quad
 
 A semantic segmentation network should take an input image, extract features from it and return the same shaped image as output with every pixel classified accordingly. For this purpose, a fully convolutional network(FCN) is used. This consists of only convolutional layers. They slide through the previous image and extracts features. These are later upsampled to the image size that then has the classifications. The feature extraction part is called an encoder and the upsampling part is called a decoder. 
 
-![Semantic segmentation network with encoder and decoder](semantic_net.png)
+![Semantic segmentation network with encoder and decoder](./misc_images/semantic_net.png)
+[Image Source](https://www.doc.ic.ac.uk/~jce317/content-images/SegmentationDiagram1.png)
 
 Typically, a 1x1 convolution is placed in between these, as it helps in extracting features from the encode with less parameters and thus faster execution. Conceptually, the 1x1 convolution is a replacement of the fully connected layers that are used in typical convoultional networks. The replacement with 1x1 convolution makes the execution faster, with lesser parameters with an added advantage that any shaped input can now be provided to the network. This is because, a fully connected network expects a fixed input shape while a convoultion does not require this.
 
-### Seperable convoultionals
+### Seperable convolutions
 A typical convoultional network contains an input, a kernel that goes through the input and adds the values across depth to obtain a single layer of features.
 
-![convoultional network](http://machinelearninguru.com/_images/topics/computer_vision/basics/convolutional_layer_1/rgb.gif)
+![convolutional network](./misc_images/conv.gif)
 [Image Source](http://machinelearninguru.com/_images/topics/computer_vision/basics/convolutional_layer_1/rgb.gif)
 
 From the above image, input is of size, 5x5x3 and a kernel of 3x3x3 is slided across it, multiplied and added to get one layer in output. Say, we need such 9 output layers, which are also referred as 9 filters, we need 9 3x3x3 filters. This requires 9x3x3x3 parameters, which is 243 parameters.
@@ -141,6 +142,101 @@ A batch normalization layer is added to normalize the values before passing the 
 ### 1x1 Convolution
 As mentioned before, 1x1 convoultion can be thought of as replacing the fully connected networks, but since it is a convolution it retains spatial information with lesser parameters and can take in any sized input. 
 
+This feature of 1x1 convolution is used after the decoder to extract more features and pass it on to the decoder of the network.
+
+```py
+def conv2d_batchnorm(input_layer, filters, kernel_size=3, strides=1):
+    output_layer = layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding='same', activation='relu')(input_layer)
+    
+    output_layer = layers.BatchNormalization()(output_layer) 
+    return output_layer
+```
+As before, a batch normalization layer is also added after the 1x1 convolution layer.
+
+### Encoder and Decoder layer
+One encoder layer contains one seperable convolution followed by a batch normalization layer.
+```py
+def encoder_block(input_layer, filters, strides):
+
+    output_layer = separable_conv2d_batchnorm(input_layer, filters, strides)
+    
+    return output_layer
+```
+
+The encoder layer extracts features from the previous layers. This information is then to be upsampled to the original image size. This process may result in losing some finer details. Inorder to retain such information, we can concatenate the previous encoder layers while upsampling. 
+
+The decoder thus contains bilinear upsampling the previous layer and concatenating an encoder layer. An additional seperable convolution is also used after this to extract some more spatial information from prior layers.
+
+```py
+def decoder_block(small_ip_layer, large_ip_layer, filters):
+    
+    # Upsample the small input layer using the bilinear_upsample() function.
+    upsample_layer = bilinear_upsample(small_ip_layer)
+    
+    # Concatenate the upsampled and large input layers using layers.concatenate
+    concatenate_layer = layers.concatenate([upsample_layer,large_ip_layer])
+    
+    # Add some number of separable convolution layers
+    output_layer = separable_conv2d_batchnorm(concatenate_layer, filters, strides=1)
+    
+    return output_layer
+```
+
+### Model architecture
+
+The model was built step by step based on the resultant score on validation images. Layers were added one by one that resulted in increase in validation accuracy. Adding the layers help in capturing more features. Also, the hyperparameters were also tuned to obtain the desired result.
+
+The model architecture used is shown in the below figure.
+!(Model architecture)[./misc_images/arch.png]
+
+The below is the code for the same
+```py
+def fcn_model(inputs, num_classes):
+    
+    # Add Encoder Blocks. 
+    # Remember that with each encoder layer, the depth of your model (the number of filters) increases.
+    layer_1 = encoder_block(inputs, 16, 2)
+    layer_2 = encoder_block(layer_1, 32, 2)
+    layer_3 = encoder_block(layer_2, 64, 2)
+
+    # Add 1x1 Convolution layer using conv2d_batchnorm().
+    conv1_layer = conv2d_batchnorm(layer_3, 128, 1, 1)
+    
+    # Add the same number of Decoder Blocks as the number of Encoder Blocks
+    decoder_layer_1 = decoder_block(conv1_layer, layer_2, 128)
+    decoder_layer_2 = decoder_block(decoder_layer_1, layer_1, 64)
+    x = decoder_block(decoder_layer_2, inputs, 16)
+
+    
+    # The function returns the output layer of your model. "x" is the final layer obtained from the last decoder_block()
+    return layers.Conv2D(num_classes, 1, activation='softmax', padding='same')(x)
+```
+
+The approach taken here was to increase layers if the validation loss was not satisfiable. 
+
+### Hyperparameters
+The following hyperparameters were tuned for obtaining the desired result.
+
+- **Learning Rate**: 0.001 was used as the learning rate at the start. The observation was long time for training the network. Thus, the learning rate was increased to  `0.1`.
+- **Batch Size**: This is the number of images that will be propogated through the network in one forward pass. A batch size of `128` was selected for training the model. The local system had enough memory to load these many data for training.
+- **Epochs**: This is the number of times the entire training dataset gets propagated through the network. The number of epochs was set to `50` and an `EarlyStopping` keras function was used to stop the training if the validation loss was not improved even after 10 epochs.
+    ```py
+    EarlyStopping(monitor='val_loss', patience=10)
+    ```
+- **Steps per Epoch**: This is the number of batches of training images that go through the network in 1 epoch. One recommended value to try would be based on the total number of images in training dataset divided by the batch_size. There was a total of 4131 images. Thus, a steps per epoch of `40` was used.
+- **Validation Steps**: This is the number of batches of validation images that go through the network in 1 epoch. This is similar to steps_per_epoch, except validation_steps is for the validation dataset. This was set as `50`.
+- **Workers**: This specifies the maximum number of processes to spin up. This can affect your training speed and is dependent on your hardware. This was set as `4` since it was trained on a local system with 8 cores.
+
+The final parameter is summarized below:
+```py
+learning_rate = 0.01
+batch_size = 128
+num_epochs = 50
+steps_per_epoch = 40
+validation_steps = 50
+workers = 4
+```
+
 ## Training and Predicting ##
 With your training and validation data having been generated or downloaded from the above section of this repository, you are free to begin working with the neural net.
 
@@ -156,7 +252,11 @@ To train the network, run the training cells in the [`model_training.ipynb`](./c
 
 After the training run has completed, your model will be stored in the [`data/weights`](./data/weights) directory as an [HDF5](https://en.wikipedia.org/wiki/Hierarchical_Data_Format) file, and a configuration_weights file. As long as they are both in the same location, things should work. 
 
-Also, the best model is stored in the same folder using the Keras `ModelCheckpoint` callback.
+There is also a `best_model.h5` in the same folder which contains the best model obtained during the training with the best validation loss. This was obtained using the Keras `ModelCheckpoint` callback.
+
+```py
+cb.ModelCheckpoint(filepath='../data/weights/best_model.h5', monitor='val_loss', save_best_only=True)
+```
 
 **Important Note** the *validation* directory is used to store data that will be used during training to produce the plots of the loss, and help determine when the network is overfitting your data. 
 
