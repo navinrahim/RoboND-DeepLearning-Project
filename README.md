@@ -187,7 +187,7 @@ def decoder_block(small_ip_layer, large_ip_layer, filters):
 The model was built step by step based on the resultant score on validation images. Layers were added one by one that resulted in increase in validation accuracy. Adding the layers help in capturing more features. Also, the hyperparameters were also tuned to obtain the desired result.
 
 The model architecture used is shown in the below figure.
-!(Model architecture)[./misc_images/arch.png]
+![Model architecture](./misc_images/arch.png)
 
 The below is the code for the same
 ```py
@@ -303,4 +303,4 @@ $ python follower.py my_amazing_model.h5
 
 **Note:** If you'd like to see an overlay of the detected region on each camera frame from the drone, simply pass the `--pred_viz` parameter to `follower.py`
 
-The output video can be found [here](www.youtube.com)
+The output video can be found [here](https://youtu.be/V1GURGRq3p0)
