@@ -303,4 +303,4 @@ $ python follower.py my_amazing_model.h5
 
 **Note:** If you'd like to see an overlay of the detected region on each camera frame from the drone, simply pass the `--pred_viz` parameter to `follower.py`
 
-The output video can be found [here]()
+The output video can be found [here](www.youtube.com)
