@@ -291,6 +291,8 @@ Multiple enhancements can be performed to obtain a more accurate model.
 
 The model obatined 131 true positives on over 300 images when target is far away and 86 false positives when target was not visible. This can be improved by collecting more data from the Quadsim for these scenarios.
 
+Also, the network can be made more deeper and hyperparameters can be tuned so that more features can be captured.
+
 ## Experimentation: Testing in Simulation
 1. Copy your saved model to the weights directory `data/weights`.
 2. Launch the simulator, select "Spawn People", and then click the "Follow Me" button.
@@ -300,3 +302,5 @@ $ python follower.py my_amazing_model.h5
 ```
 
 **Note:** If you'd like to see an overlay of the detected region on each camera frame from the drone, simply pass the `--pred_viz` parameter to `follower.py`
+
+The output video can be found [here]()
