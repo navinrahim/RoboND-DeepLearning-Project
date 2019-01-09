@@ -108,8 +108,10 @@ Rename or move `data/train`, and `data/validation`, then move `data/processed_im
 
 Merging multiple `train` or `validation` may be difficult, it is recommended that data choices be determined by what you include in `raw_sim_data/train/run1` with possibly many different runs in the directory. You can create a temporary folder in `data/` and store raw run data you don't currently want to use, but that may be useful for later. Choose which `run_x` folders to include in `raw_sim_data/train`, and `raw_sim_data/validation`, then run  `preprocess_ims.py` from within the 'code/' directory to generate your new training and validation sets. 
 
+## Model ##
+The primary task of this project is to identify and follow a person using a quadroptor in simulation. A semantic segmentation approach was selected for this purpose that accurately classifies each pixel in the image from the quadroptor as the person to be followed or not.
 
-## Training, Predicting and Scoring ##
+## Training and Predicting ##
 With your training and validation data having been generated or downloaded from the above section of this repository, you are free to begin working with the neural net.
 
 **Note**: Training CNNs is a very compute-intensive process. If your system does not have a recent Nvidia graphics card, with [cuDNN](https://developer.nvidia.com/cudnn) and [CUDA](https://developer.nvidia.com/cuda) installed , you may need to perform the training step in the cloud. Instructions for using AWS to train your network in the cloud may be found [here](https://classroom.udacity.com/nanodegrees/nd209/parts/09664d24-bdec-4e64-897a-d0f55e177f09/modules/cac27683-d5f4-40b4-82ce-d708de8f5373/lessons/197a058e-44f6-47df-8229-0ce633e0a2d0/concepts/27c73209-5d7b-4284-8315-c0e07a7cd87f?contentVersion=1.0.0&contentLocale=en-us)
@@ -132,9 +134,6 @@ The **sample_evalution_data** directory contains data specifically designed to t
 
 The notebook has examples of how to evaulate your model once you finish training. Think about the sourcing methods, and how the information provided in the evaluation sections relates to the final score. Then try things out that seem like they may work.
 
-## Model ##
-The primary task of this project is to identify and follow a person using a quadroptor in simulation. A semantic segmentation approach was selected for this purpose that accurately classifies the 
-
 ## Scoring ##
 
 To score the network on the Follow Me task, two types of error are measured. First the intersection over the union for the pixelwise classifications is computed for the target channel. 
@@ -149,13 +148,7 @@ Using the above the number of detection true_positives, false positives, false n
 
 The final score is the pixelwise `average_IoU*(n_true_positive/(n_true_positive+n_false_positive+n_false_negative))` on data similar to that provided in sample_evaulation_data
 
-**Ideas for Improving your Score**
-
-Collect more data from the sim. Look at the predictions think about what the network is getting wrong, then collect data to counteract this. Or improve your network architecture and hyperparameters. 
-
-**Obtaining a Leaderboard Score**
-
-Share your scores in slack, and keep a tally in a pinned message. Scores should be computed on the sample_evaluation_data. This is for fun, your grade will be determined on unreleased data. If you use the sample_evaluation_data to train the network, it will result in inflated scores, and you will not be able to determine how your network will actually perform when evaluated to determine your grade.
+## Future Enhancements ##
 
 ## Experimentation: Testing in Simulation
 1. Copy your saved model to the weights directory `data/weights`.
