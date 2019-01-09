@@ -116,17 +116,17 @@ A semantic segmentation network should take an input image, extract features fro
 ![Semantic segmentation network with encoder and decoder](./misc_images/semantic_net.png)
 [Image Source](https://www.doc.ic.ac.uk/~jce317/content-images/SegmentationDiagram1.png)
 
-Typically, a 1x1 convolution is placed in between these, as it helps in extracting features from the encode with less parameters and thus faster execution. Conceptually, the 1x1 convolution is a replacement of the fully connected layers that are used in typical convoultional networks. The replacement with 1x1 convolution makes the execution faster, with lesser parameters with an added advantage that any shaped input can now be provided to the network. This is because, a fully connected network expects a fixed input shape while a convoultion does not require this.
+Typically, a 1x1 convolution is placed in between these, as it helps in extracting features from the encode with less parameters and thus faster execution. Conceptually, the 1x1 convolution is a replacement of the fully connected layers that are used in typical convolutional networks. The replacement with 1x1 convolution makes the execution faster, with lesser parameters with an added advantage that any shaped input can now be provided to the network. This is because, a fully connected network expects a fixed input shape while a convolution does not require this.
 
 ### Seperable convolutions
-A typical convoultional network contains an input, a kernel that goes through the input and adds the values across depth to obtain a single layer of features.
+A typical convolutional network contains an input, a kernel that goes through the input and adds the values across depth to obtain a single layer of features.
 
 ![convolutional network](./misc_images/conv.gif)
 [Image Source](http://machinelearninguru.com/_images/topics/computer_vision/basics/convolutional_layer_1/rgb.gif)
 
 From the above image, input is of size, 5x5x3 and a kernel of 3x3x3 is slided across it, multiplied and added to get one layer in output. Say, we need such 9 output layers, which are also referred as 9 filters, we need 9 3x3x3 filters. This requires 9x3x3x3 parameters, which is 243 parameters.
 
-A seperable convoultion comes in to picture to reduce this high number of parameters. Here, we just use one kernel as shown in the image, but instead of adding them to form one layer, we keep it as an output of depth 3 itself and run required number of 1x1 convoultions over it. Thus, we use 1 3x3x3 kernel and 9 1x1 convoutions. This reduces the number of parameters to 3x3x3 + 9x1x1x3 = 54 parameters.
+A seperable convolution comes in to picture to reduce this high number of parameters. Here, we just use one kernel as shown in the image, but instead of adding them to form one layer, we keep it as an output of depth 3 itself and run required number of 1x1 convolutions over it. Thus, we use 1 3x3x3 kernel and 9 1x1 convolutions. This reduces the number of parameters to 3x3x3 + 9x1x1x3 = 54 parameters.
 
 This was used for the encoder blocks in the code for this project.
 ```py
@@ -140,7 +140,7 @@ def separable_conv2d_batchnorm(input_layer, filters, strides=1):
 A batch normalization layer is added to normalize the values before passing the output to next layer with inputs that are zero mean/unit variance. This imporves the performance and stability of the network. 
 
 ### 1x1 Convolution
-As mentioned before, 1x1 convoultion can be thought of as replacing the fully connected networks, but since it is a convolution it retains spatial information with lesser parameters and can take in any sized input. 
+As mentioned before, 1x1 convolution can be thought of as replacing the fully connected networks, but since it is a convolution it retains spatial information with lesser parameters and can take in any sized input. 
 
 This feature of 1x1 convolution is used after the decoder to extract more features and pass it on to the decoder of the network.
 
