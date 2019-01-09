@@ -111,6 +111,36 @@ Merging multiple `train` or `validation` may be difficult, it is recommended tha
 ## Model ##
 The primary task of this project is to identify and follow a person using a quadroptor in simulation. A semantic segmentation approach was selected for this purpose that accurately classifies each pixel in the image from the quadroptor as the person to be followed or not.
 
+A semantic segmentation network should take an input image, extract features from it and return the same shaped image as output with every pixel classified accordingly. For this purpose, a fully convolutional network(FCN) is used. This consists of only convolutional layers. They slide through the previous image and extracts features. These are later upsampled to the image size that then has the classifications. The feature extraction part is called an encoder and the upsampling part is called a decoder. 
+
+![Semantic segmentation network with encoder and decoder](semantic_net.png)
+
+Typically, a 1x1 convolution is placed in between these, as it helps in extracting features from the encode with less parameters and thus faster execution. Conceptually, the 1x1 convolution is a replacement of the fully connected layers that are used in typical convoultional networks. The replacement with 1x1 convolution makes the execution faster, with lesser parameters with an added advantage that any shaped input can now be provided to the network. This is because, a fully connected network expects a fixed input shape while a convoultion does not require this.
+
+### Seperable convoultionals
+A typical convoultional network contains an input, a kernel that goes through the input and adds the values across depth to obtain a single layer of features.
+
+![convoultional network](http://machinelearninguru.com/_images/topics/computer_vision/basics/convolutional_layer_1/rgb.gif)
+[Image Source](http://machinelearninguru.com/_images/topics/computer_vision/basics/convolutional_layer_1/rgb.gif)
+
+From the above image, input is of size, 5x5x3 and a kernel of 3x3x3 is slided across it, multiplied and added to get one layer in output. Say, we need such 9 output layers, which are also referred as 9 filters, we need 9 3x3x3 filters. This requires 9x3x3x3 parameters, which is 243 parameters.
+
+A seperable convoultion comes in to picture to reduce this high number of parameters. Here, we just use one kernel as shown in the image, but instead of adding them to form one layer, we keep it as an output of depth 3 itself and run required number of 1x1 convoultions over it. Thus, we use 1 3x3x3 kernel and 9 1x1 convoutions. This reduces the number of parameters to 3x3x3 + 9x1x1x3 = 54 parameters.
+
+This was used for the encoder blocks in the code for this project.
+```py
+def separable_conv2d_batchnorm(input_layer, filters, strides=1):
+    output_layer = SeparableConv2DKeras(filters=filters,kernel_size=3, strides=strides, padding='same', activation='relu')(input_layer)
+    
+    output_layer = layers.BatchNormalization()(output_layer) 
+    return output_layer
+```
+
+A batch normalization layer is added to normalize the values before passing the output to next layer with inputs that are zero mean/unit variance. This imporves the performance and stability of the network. 
+
+### 1x1 Convolution
+As mentioned before, 1x1 convoultion can be thought of as replacing the fully connected networks, but since it is a convolution it retains spatial information with lesser parameters and can take in any sized input. 
+
 ## Training and Predicting ##
 With your training and validation data having been generated or downloaded from the above section of this repository, you are free to begin working with the neural net.
 
