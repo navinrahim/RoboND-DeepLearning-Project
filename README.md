@@ -291,6 +291,8 @@ The model obatined 131 true positives on over 300 images when target is far away
 
 Also, the network can be made more deeper and hyperparameters can be tuned so that more features can be captured.
 
+The network will also only identify the human for which it was trained. The model will have to be retrained for other humans, but can be done by keeping the encoder layers frozen and the decoder layers trained. But, it requires a dataset to transfer the network to a new use case.
+
 ## Experimentation: Testing in Simulation
 1. Copy your saved model to the weights directory `data/weights`.
 2. Launch the simulator, select "Spawn People", and then click the "Follow Me" button.
