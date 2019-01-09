@@ -278,7 +278,18 @@ Using the above the number of detection true_positives, false positives, false n
 
 The final score is the pixelwise `average_IoU*(n_true_positive/(n_true_positive+n_false_positive+n_false_negative))` on data similar to that provided in sample_evaulation_data
 
+**Result**
+The below figure shows the training plot with training and validation losses.
+![training plot](./misc_images/training_plot.png)
+
+The best validation loss was obtained in the 49th epoch with a validation loss of 0.0295 and validation accuracy of `99.19%`.
+
+The final grade obtained was `0.411`. This includes the IoU of the quad following behing the target and detection of target from far away.
+
 ## Future Enhancements ##
+Multiple enhancements can be performed to obtain a more accurate model.
+
+The model obatined 131 true positives on over 300 images when target is far away and 86 false positives when target was not visible. This can be improved by collecting more data from the Quadsim for these scenarios.
 
 ## Experimentation: Testing in Simulation
 1. Copy your saved model to the weights directory `data/weights`.
