@@ -140,7 +140,9 @@ def separable_conv2d_batchnorm(input_layer, filters, strides=1):
 A batch normalization layer is added to normalize the values before passing the output to next layer with inputs that are zero mean/unit variance. This imporves the performance and stability of the network. 
 
 ### 1x1 Convolution
-As mentioned before, 1x1 convolution can be thought of as replacing the fully connected networks, but since it is a convolution it retains spatial information with lesser parameters and can take in any sized input. 
+As mentioned before, 1x1 convolution can be thought of as replacing the fully connected networks, but since it is a convolution it retains spatial information with lesser parameters and can take in any sized input. It thus results in faster execution.
+
+It is also a very inexpensive way to deepen the network compared to the fully connected network. Spatial information is reserved as there is no flattening of inputs as required in fully connected networks. 
 
 This feature of 1x1 convolution is used after the decoder to extract more features and pass it on to the decoder of the network.
 
