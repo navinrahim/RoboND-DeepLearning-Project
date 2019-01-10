@@ -144,6 +144,8 @@ As mentioned before, 1x1 convolution can be thought of as replacing the fully co
 
 It is also a very inexpensive way to deepen the network compared to the fully connected network. Spatial information is reserved as there is no flattening of inputs as required in fully connected networks. 
 
+1x1 convolution helps in reducing the dimensionality of the input layer. A fully-connected layer of the same size would result in the same number of features. However, replacement of fully-connected layers with convolutional layers presents an added advantage that during inference (testing your model), we can feed images of any size into your trained network.
+
 This feature of 1x1 convolution is used after the decoder to extract more features and pass it on to the decoder of the network.
 
 ```py
